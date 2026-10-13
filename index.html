@@ -17,12 +17,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:70px 20px 20px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:420px}
 .card h1{font-size:22px;margin-bottom:6px}
-.card p{color:var(--muted);font-size:14px;margin-bottom:20px}
+.card p{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.5}
 .card input{width:100%;height:46px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:0 14px;color:var(--text);font-size:16px;outline:none;margin-bottom:10px}
 .card input:focus{border-color:var(--accent)}
-.btn{display:block;width:100%;height:46px;line-height:46px;text-align:center;border:0;border-radius:12px;background:var(--accent);color:#000;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;padding:0}
-.err{color:var(--danger);font-size:13px;margin-top:10px;text-align:center}
+.btn{display:block;width:100%;height:46px;line-height:46px;text-align:center;border:0;border-radius:12px;background:var(--accent);color:#000;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;padding:0;margin-bottom:10px}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.link{color:var(--muted);font-size:13px;text-align:center;cursor:pointer;text-decoration:underline}
+.err{color:var(--danger);font-size:13px;margin-top:6px;text-align:center}
+.phrase{background:var(--card2);border:1px dashed var(--accent);border-radius:12px;padding:14px;margin-bottom:10px;font-family:ui-monospace,Menlo,monospace;font-size:17px;line-height:1.5;text-align:center;cursor:pointer;word-break:break-word}
 #content{max-width:800px;width:100%}
+.welcome{background:#112a1b;border:1px solid #1f4a30;color:var(--ok);padding:12px 16px;border-radius:12px;margin-bottom:18px;font-weight:600}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:10000;background:#112a1b;border:1px solid #1f4a30;color:var(--ok);padding:10px 18px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 
 /* ---------- admin drawer ---------- */
 #adm-btn{position:fixed;top:12px;left:12px;z-index:9999;height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font:600 13px system-ui,sans-serif;cursor:pointer}
@@ -35,6 +41,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #adm button.d{background:transparent;border:1px solid #4a2a2a;color:var(--danger);height:28px;font-size:12px;width:auto;margin-top:8px}
 #adm button.g{background:transparent;border:1px solid var(--border);color:var(--text);width:auto;height:30px}
 #adm .m{color:var(--muted);font-size:12px}
+#adm .wel{background:#112a1b;border:1px solid #1f4a30;border-radius:12px;padding:12px;margin-bottom:6px}
+#adm .wel b{color:var(--ok);display:block;margin-bottom:4px}
 #adm .it{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
 #adm .tp,#adm .row{display:flex;justify-content:space-between;align-items:center}
 #adm .row{margin-top:6px}
@@ -63,12 +71,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
   </div>
 
   <div id="a-main" class="hid">
-    <div class="row" style="margin-top:0">
+    <div class="wel"><b id="a-welcome"></b><div class="m" id="a-note"></div></div>
+    <div class="row" style="margin-top:10px">
       <b id="a-role"></b><button class="g" id="a-out">Log out</button>
     </div>
 
     <h3>Generate key</h3>
-    <input id="a-note" placeholder="Ticket # / note (optional)" maxlength="80" />
+    <input id="a-note-in" placeholder="Ticket # / note (optional)" maxlength="80" />
     <button id="a-gen">Generate 2-hour key</button>
     <div id="a-big" class="big hid">
       <div class="m">Latest key (click to copy)</div>
@@ -90,14 +99,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <div id="stage"></div>
 
 <script>
-/* =================== MAIN SITE =================== */
+/* =================== SHARED HELPERS =================== */
 const $ = s => document.querySelector(s);
 const h = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const JSONH = { 'Content-Type': 'application/json' };
 const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [s / 3600 | 0, s % 3600 / 60 | 0, s % 60].map(n => String(n).padStart(2, '0')).join(':'); };
 const av = u => /^https:\/\/[\w.-]+\.rbxcdn\.com\//.test((u && u.avatar) || '') ? u.avatar : '';
+const copyText = (t, el) => { navigator.clipboard.writeText(t); const o = el.textContent; el.textContent = 'Copied!'; setTimeout(() => el.textContent = o, 900); };
 
-let unlockedShown = false;
+// fetch that returns JSON and gives up after `ms` so nothing hangs forever
+async function jf(url, opt = {}, ms = 12000) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), ms);
+  try { return await (await fetch(url, { ...opt, signal: ac.signal })).json(); }
+  finally { clearTimeout(t); }
+}
 
+/* =================== MAIN SITE =================== */
+let view = '', greeted = false, justVerified = false;
+
+function toast(text) {
+  const e = h('div', 'toast', text); document.body.append(e);
+  setTimeout(() => e.remove(), 4500);
+}
+function setCard(name, nodes) {
+  view = name;
+  const st = $('#stage'); st.replaceChildren();
+  const c = h('div', 'card'); c.append(...nodes); st.append(c);
+}
 function renderBar(user) {
   const b = $('#userbar'); b.replaceChildren();
   if (!user) { b.classList.add('hid'); return; }
@@ -107,57 +136,109 @@ function renderBar(user) {
   b.append(h('span', null, user.name), lo);
 }
 
-function gate(content) {
-  const st = $('#stage'); st.replaceChildren(); unlockedShown = false;
-  const c = h('div', 'card'); c.append(...content); st.append(c);
+/* ---- step 1: username ---- */
+function showUser() {
+  if (view === 'user') return;
+  const i = h('input'); i.placeholder = 'Roblox username'; i.autocomplete = 'off'; i.autocapitalize = 'off';
+  const b = h('button', 'btn', 'Continue');
+  const msg = h('div', 'err hid');
+  const go = async () => {
+    if (!i.value.trim()) return;
+    b.disabled = true; b.textContent = 'Looking up account...'; msg.classList.add('hid');
+    try {
+      const j = await jf('/api/auth/roblox', { method: 'POST', headers: JSONH, body: JSON.stringify({ username: i.value }) }, 10000);
+      if (j.ok) { showVerify(j.name, j.phrase); return; }
+      msg.textContent = j.error || 'Failed'; msg.classList.remove('hid');
+    } catch { msg.textContent = 'Took too long, try again'; msg.classList.remove('hid'); }
+    b.disabled = false; b.textContent = 'Continue';
+  };
+  b.onclick = go; i.addEventListener('keydown', e => e.key === 'Enter' && go());
+  setCard('user', [h('h1', null, 'Welcome'), h('p', null, 'Enter your Roblox username to continue.'), i, b, msg]);
+}
+
+/* ---- step 2: put the words in your bio ---- */
+function showVerify(name, phrase) {
+  if (view === 'verify') return;
+  const box = h('div', 'phrase', phrase); box.onclick = () => copyText(phrase, box);
+  const cp = h('button', 'btn ghost', 'Copy words'); cp.onclick = () => copyText(phrase, cp);
+  const b = h('button', 'btn', 'I added it, verify me');
+  const back = h('div', 'link', 'Wrong account? Go back');
+  const msg = h('div', 'err hid');
+
+  back.onclick = async () => { await fetch('/api/auth/logout', { redirect: 'manual' }); view = ''; check(); };
+  b.onclick = async () => {
+    b.disabled = true; b.textContent = 'Checking your bio...'; msg.classList.add('hid');
+    try {
+      const j = await jf('/api/auth/verify', { method: 'POST' }, 15000);
+      if (j.ok) { justVerified = true; view = ''; await check(); if (window.adminAuto) window.adminAuto(); return; }
+      if (j.expired) { view = ''; check(); return; }
+      msg.textContent = j.error || 'Failed'; msg.classList.remove('hid');
+    } catch { msg.textContent = 'Took too long, try again'; msg.classList.remove('hid'); }
+    b.disabled = false; b.textContent = 'I added it, verify me';
+  };
+  setCard('verify', [
+    h('h1', null, 'Verify it\'s you'),
+    h('p', null, `Found ${name}. Paste these words into your Roblox profile bio (About section), save it, then press verify. You can remove them after.`),
+    box, cp, b, msg, back,
+  ]);
+}
+
+/* ---- step 3: key ---- */
+function showKey(user, err) {
+  if (view !== 'key') {
+    const i = h('input'); i.id = 'keyIn'; i.placeholder = 'XXXX-XXXX-XXXX-XXXX'; i.autocomplete = 'off';
+    const b = h('button', 'btn', 'Redeem key');
+    const msg = h('div', 'err hid'); msg.id = 'keyMsg';
+    const go = async () => {
+      b.disabled = true; b.textContent = 'Checking...';
+      try {
+        const j = await jf('/api/redeem', { method: 'POST', headers: JSONH, body: JSON.stringify({ key: i.value }) });
+        if (j.ok) { view = ''; check(); return; }
+        msg.textContent = j.error || 'Invalid key'; msg.classList.remove('hid');
+      } catch { msg.textContent = 'Something went wrong, try again'; msg.classList.remove('hid'); }
+      b.disabled = false; b.textContent = 'Redeem key';
+    };
+    b.onclick = go; i.addEventListener('keydown', e => e.key === 'Enter' && go());
+    setCard('key', [
+      h('h1', null, `Welcome back, ${user.name} 👋`),
+      h('p', null, 'Enter your key to continue. Open a ticket in the Discord server to get one. Keys last 2 hours and lock to your IP.'),
+      i, b, msg,
+    ]);
+  }
+  if (err) { const m = $('#keyMsg'); m.textContent = err; m.classList.remove('hid'); }
+}
+
+/* ---- step 4: protected content ---- */
+async function showContent(user) {
+  if (view === 'content') return;
+  const r = await fetch('/api/content');
+  if (!r.ok) return;
+  const j = await r.json();
+  view = 'content';
+  const st = $('#stage'); st.replaceChildren();
+  const box = h('div'); box.id = 'content';
+  const body = h('div'); body.innerHTML = j.html; // html comes from your own api/content.js
+  box.append(h('div', 'welcome', `Welcome back, ${user.name} 👋`), body);
+  st.append(box);
 }
 
 async function check() {
   let d;
-  try { d = await (await fetch('/api/me')).json(); } catch { return; }
+  try { d = await jf('/api/me', {}, 10000); } catch { return; }
   renderBar(d.user);
 
-  // step 1: Roblox username
+  if (d.user && !greeted) {
+    greeted = true;
+    toast(justVerified ? `Verified! Welcome, ${d.user.name} 🎉` : `Welcome back, ${d.user.name} 👋`);
+    justVerified = false;
+  }
   if (!d.user) {
-    if ($('#rbIn')) return; // don't wipe what they're typing
-    const i = h('input'); i.id = 'rbIn'; i.placeholder = 'Roblox username'; i.autocomplete = 'off';
-    const b = h('button', 'btn', 'Continue');
-    const msg = h('div', 'err hid');
-    const go = async () => {
-      b.textContent = 'Checking...';
-      const r = await fetch('/api/auth/roblox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: i.value }) });
-      const j = await r.json(); b.textContent = 'Continue';
-      if (j.ok) check(); else { msg.textContent = j.error || 'Failed'; msg.classList.remove('hid'); }
-    };
-    b.onclick = go; i.addEventListener('keydown', e => e.key === 'Enter' && go());
-    return gate([h('h1', null, 'Welcome'), h('p', null, 'Enter your Roblox username to continue.'), i, b, msg]);
+    greeted = false;
+    if (d.pending) showVerify(d.pending.name, d.pending.phrase); else showUser();
+    return;
   }
-
-  // step 2: key
-  if (!d.unlocked) {
-    if ($('#keyIn') && !d.error) return;
-    const i = h('input'); i.id = 'keyIn'; i.placeholder = 'XXXX-XXXX-XXXX-XXXX'; i.autocomplete = 'off';
-    const b = h('button', 'btn', 'Redeem key');
-    const msg = h('div', 'err', d.error || ''); if (!d.error) msg.classList.add('hid');
-    const go = async () => {
-      b.textContent = 'Checking...';
-      const r = await fetch('/api/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: i.value }) });
-      const j = await r.json(); b.textContent = 'Redeem key';
-      if (j.ok) check(); else { msg.textContent = j.error || 'Invalid key'; msg.classList.remove('hid'); }
-    };
-    b.onclick = go; i.addEventListener('keydown', e => e.key === 'Enter' && go());
-    return gate([h('h1', null, 'Enter your key'), h('p', null, 'Open a ticket in the Discord server to get one. Keys last 2 hours and lock to your IP.'), i, b, msg]);
-  }
-
-  // step 3: unlocked, load protected content once
-  if (!unlockedShown) {
-    const r = await fetch('/api/content');
-    if (!r.ok) return;
-    const j = await r.json();
-    const st = $('#stage'); st.replaceChildren();
-    const box = h('div'); box.id = 'content'; box.innerHTML = j.html; // html comes from your own api/content.js
-    st.append(box); unlockedShown = true;
-  }
+  if (!d.unlocked) { showKey(d.user, d.error); return; }
+  await showContent(d.user);
 }
 check(); setInterval(check, 30000);
 
@@ -166,35 +247,68 @@ check(); setInterval(check, 30000);
   let tok = sessionStorage.getItem('atok'), role = sessionStorage.getItem('arole'), st = { keys: [], online: [] }, poll;
 
   async function api(p, opt = {}) {
-    const r = await fetch('/api/' + p, { ...opt, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok } });
-    if (r.status === 401) { logout(); throw 0; }
+    const r = await fetch('/api/' + p, { ...opt, headers: { ...JSONH, Authorization: 'Bearer ' + tok } });
+    if (r.status === 401) { clearAdmin(); throw 0; }
     return r.json();
   }
-  const copy = (t, el) => { navigator.clipboard.writeText(t); const o = el.textContent; el.textContent = 'Copied!'; setTimeout(() => el.textContent = o, 900); };
 
-  function logout() {
-    sessionStorage.removeItem('atok'); sessionStorage.removeItem('arole'); tok = null; clearInterval(poll);
+  function clearAdmin() {
+    ['atok', 'arole', 'awel', 'anote'].forEach(k => sessionStorage.removeItem(k));
+    tok = null; clearInterval(poll);
     $('#a-main').classList.add('hid'); $('#a-login').classList.remove('hid');
   }
+
   function show() {
     $('#a-login').classList.add('hid'); $('#a-main').classList.remove('hid');
     $('#a-role').textContent = (role || '').toUpperCase();
+    $('#a-welcome').textContent = sessionStorage.getItem('awel') || 'Welcome to the admin panel';
+    $('#a-note').textContent = sessionStorage.getItem('anote') || '';
     refresh(); clearInterval(poll); poll = setInterval(refresh, 5000);
   }
 
+  function afterLogin(d, manual) {
+    tok = d.token; role = d.role;
+    sessionStorage.setItem('atok', tok); sessionStorage.setItem('arole', role);
+    sessionStorage.setItem('awel', d.auto
+      ? `Welcome back to the admin panel, ${d.name}`
+      : (d.name ? `Welcome to the admin panel, ${d.name}` : 'Welcome to the admin panel'));
+    sessionStorage.setItem('anote', (d.auto || d.remembered)
+      ? 'Your account + IP are remembered, you will be logged in automatically next time.'
+      : 'Tip: verify your Roblox account on the site, then log in again to enable auto-login.');
+    show();
+    if (manual) $('#adm').classList.add('open');
+  }
+
+  // auto login (verified account + remembered IP)
+  async function autoLogin() {
+    if (tok) return;
+    try { const d = await jf('/api/login', {}, 8000); if (d.ok) afterLogin(d, false); } catch {}
+  }
+  window.adminAuto = autoLogin;
+
   $('#adm-btn').onclick = () => $('#adm').classList.toggle('open');
-  $('#a-out').onclick = logout;
+
+  $('#a-out').onclick = async () => {
+    try { await fetch('/api/login', { method: 'POST', headers: { ...JSONH, Authorization: 'Bearer ' + tok }, body: JSON.stringify({ action: 'logout' }) }); } catch {}
+    clearAdmin();
+  };
+
   $('#a-go').onclick = async () => {
-    const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('#a-pw').value }) });
-    const d = await r.json();
-    if (!r.ok) { $('#a-err').textContent = d.error || 'Failed'; $('#a-err').classList.remove('hid'); return; }
-    tok = d.token; role = d.role; sessionStorage.setItem('atok', tok); sessionStorage.setItem('arole', role);
-    $('#a-pw').value = ''; $('#a-err').classList.add('hid'); show();
+    const b = $('#a-go'); b.disabled = true; b.textContent = 'Checking...';
+    try {
+      const r = await fetch('/api/login', { method: 'POST', headers: JSONH, body: JSON.stringify({ password: $('#a-pw').value }) });
+      const d = await r.json();
+      if (!r.ok) { $('#a-err').textContent = d.error || 'Failed'; $('#a-err').classList.remove('hid'); }
+      else { $('#a-pw').value = ''; $('#a-err').classList.add('hid'); afterLogin(d, true); }
+    } catch { $('#a-err').textContent = 'Something went wrong'; $('#a-err').classList.remove('hid'); }
+    b.disabled = false; b.textContent = 'Unlock';
   };
   $('#a-pw').addEventListener('keydown', e => e.key === 'Enter' && $('#a-go').click());
+
   $('#a-gen').onclick = async () => {
-    await api('panel', { method: 'POST', body: JSON.stringify({ action: 'create', note: $('#a-note').value }) });
-    $('#a-note').value = ''; refresh();
+    const b = $('#a-gen'); b.disabled = true;
+    await api('panel', { method: 'POST', body: JSON.stringify({ action: 'create', note: $('#a-note-in').value }) });
+    $('#a-note-in').value = ''; b.disabled = false; refresh();
   };
 
   async function refresh() {
@@ -204,7 +318,7 @@ check(); setInterval(check, 30000);
 
     const L = keys[0]; $('#a-big').classList.toggle('hid', !L);
     if (L) {
-      $('#a-bk').textContent = L.key; $('#a-bk').onclick = () => copy(L.key, $('#a-bk'));
+      $('#a-bk').textContent = L.key; $('#a-bk').onclick = () => copyText(L.key, $('#a-bk'));
       $('#a-bt').dataset.exp = L.expires;
       $('#a-bm').textContent = L.status === 'locked' ? 'Locked to ' + (L.user?.name || 'user') : 'Not used yet';
     }
@@ -213,7 +327,7 @@ check(); setInterval(check, 30000);
     if (!keys.length) kl.append(h('div', 'm', 'No active keys'));
     keys.forEach(k => {
       const it = h('div', 'it'), tp = h('div', 'tp');
-      const kk = h('span', 'k', k.key); kk.onclick = () => copy(k.key, kk);
+      const kk = h('span', 'k', k.key); kk.onclick = () => copyText(k.key, kk);
       tp.append(kk, h('span', 'p ' + k.status, k.status === 'locked' ? 'In use' : 'Waiting')); it.append(tp);
       if (k.note) it.append(h('div', 'm', k.note));
       if (k.user) { const u = h('div', 'm'); const s = av(k.user); if (s) { const i = h('img'); i.src = s; u.append(i); } u.append(k.user.name || 'unknown'); it.append(u); }
@@ -233,6 +347,7 @@ check(); setInterval(check, 30000);
     });
     tick();
   }
+
   function tick() {
     document.querySelectorAll('#adm [data-exp]').forEach(el => {
       const l = Number(el.dataset.exp) - Date.now();
@@ -240,7 +355,8 @@ check(); setInterval(check, 30000);
     });
   }
   setInterval(tick, 1000);
-  if (tok) show();
+
+  if (tok) show(); else autoLogin();
 })();
 </script>
 </body>
