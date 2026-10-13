@@ -1,52 +1,36 @@
-const crypto = require("crypto");
-const { issue, valid, cookie } = require("./_session");
-
-// Best-effort brute-force limit: 8 wrong tries per IP per 10 minutes.
-const tries = new Map();
-const WINDOW = 10 * 60 * 1000;
-const MAX_TRIES = 8;
-
-function tooMany(ip) {
-  const now = Date.now();
-  const list = (tries.get(ip) || []).filter(t => now - t < WINDOW);
-  tries.set(ip, list);
-  return list.length >= MAX_TRIES;
-}
-
-const digest = s => crypto.createHash("sha256").update(String(s)).digest();
+require('../_config');
+const { r, clientIp, sessCookie } = require('../_lib');
 
 module.exports = async (req, res) => {
-  res.setHeader("Cache-Control", "no-store");
+  if (req.method !== 'POST') return res.status(405).end();
 
-  if (req.method === "GET") {
-    const ok = valid(req);
-    return res.status(ok ? 200 : 401).json({ ok });
-  }
+  const ip = clientIp(req) || 'x';
+  const n = await r('INCR', 'rb:' + ip);
+  if (n === 1) await r('EXPIRE', 'rb:' + ip, 600);
+  if (n > 20) return res.status(429).json({ ok: false, error: 'Too many tries, wait a few minutes' });
 
-  if (req.method === "DELETE") {
-    res.setHeader("Set-Cookie", cookie("", 0));
-    return res.status(200).json({ ok: true });
-  }
+  const name = String((req.body || {}).username || '').trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(name))
+    return res.status(400).json({ ok: false, error: 'Invalid username' });
 
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  const u = await fetch('https://users.roblox.com/v1/usernames/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usernames: [name], excludeBannedUsers: true }),
+  }).then(x => x.json()).catch(() => null);
 
-  if (!process.env.ACCESS_PASSWORD || !process.env.SESSION_SECRET) {
-    return res.status(500).json({ error: "not_configured" });
-  }
+  const found = u && u.data && u.data[0];
+  if (!found) return res.status(404).json({ ok: false, error: 'Roblox user not found' });
 
-  const ip = String(req.headers["x-forwarded-for"] || "unknown").split(",")[0].trim();
-  if (tooMany(ip)) return res.status(429).json({ error: "too_many" });
+  let avatar = '';
+  try {
+    const t = await fetch(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${found.id}&size=150x150&format=Png`
+    ).then(x => x.json());
+    const url = t && t.data && t.data[0] && t.data[0].imageUrl;
+    if (/^https:\/\/[\w.-]+\.rbxcdn\.com\//.test(url || '')) avatar = url;
+  } catch {}
 
-  const given = req.body && typeof req.body.password === "string" ? req.body.password : "";
-  const ok = crypto.timingSafeEqual(digest(given), digest(process.env.ACCESS_PASSWORD));
-
-  if (!ok) {
-    tries.get(ip).push(Date.now());
-    await new Promise(r => setTimeout(r, 600));
-    return res.status(401).json({ error: "wrong_password" });
-  }
-
-  tries.delete(ip);
-  res.setHeader("Set-Cookie", cookie(issue()));
-  return res.status(200).json({ ok: true });
+  res.setHeader('Set-Cookie', sessCookie({ id: String(found.id), name: found.name, avatar }));
+  res.json({ ok: true });
 };
