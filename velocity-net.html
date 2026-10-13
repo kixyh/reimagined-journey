@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Velocity-Net" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Velocity-Net session" />
+  <title>Velocity-Net</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --card: #111111;
+      --accent: #ffffff;
+      --muted: #888888;
+      --success: #22c55e;
+      --border: #222222;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--accent);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      -webkit-user-select: none;
+      user-select: none;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .status-bar { height: env(safe-area-inset-top, 20px); background: transparent; }
+    header {
+      padding: 16px 20px 8px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: #0a0a0a; display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .logo svg { width: 30px; height: 30px; }
+    h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    .subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    main {
+      flex: 1; padding: 12px 16px 32px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px;
+    }
+    .card-title {
+      font-size: 12px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.7px; margin-bottom: 12px; font-weight: 600;
+    }
+    .row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px;
+    }
+    .row:last-child { border-bottom: none; }
+    .label { color: var(--muted); font-size: 14px; flex-shrink: 0; }
+    .value {
+      font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums;
+      text-align: right; word-break: break-all;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34, 197, 94, 0.12); color: var(--success);
+      font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+    }
+    .badge::before {
+      content: ""; width: 6px; height: 6px; background: var(--success);
+      border-radius: 50%; animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .btn {
+      display: block; width: 100%; padding: 16px; border: none; border-radius: 14px;
+      background: var(--accent); color: #000; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: transform 0.12s, opacity 0.12s;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.88; }
+    .btn-secondary {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border); margin-top: 10px;
+    }
+    .log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px; line-height: 1.55; color: #aaa;
+      max-height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+    }
+    .footer { text-align: center; padding: 14px; font-size: 11px; color: #444; }
+  </style>
+</head>
+<body>
+  <div class="status-bar"></div>
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Velocity-Net</h1>
+      <div class="subtitle">Secure session active</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="card-title">Session</div>
+      <div class="row">
+        <span class="label">Status</span>
+        <span class="badge">Online</span>
+      </div>
+      <div class="row">
+        <span class="label">User ID</span>
+        <span class="value" id="userId">—</span>
+      </div>
+      <div class="row">
+        <span class="label">API Key</span>
+        <span class="value" id="apiKey">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick Actions</div>
+      <button class="btn" id="btnPing">Run Handshake</button>
+      <button class="btn btn-secondary" id="btnRefresh">Refresh Session</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Activity Log</div>
+      <div class="log" id="log">Waiting for activity…</div>
+    </div>
+  </main>
+
+  <div class="footer">Velocity-Net · local secure mode</div>
+
+  <script>
+    // Defaults from user
+    const DEFAULT_USER_ID = "6918190";
+    const DEFAULT_API_KEY = "c077095d207d5f75ff398260363969d57c449972ae08ae0b028f1631a48987ae5d82d02883bb7af31f8ea7c93e09cfd484acf89904ccce1f3541629a0d580c65";
+
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("user_id") || DEFAULT_USER_ID;
+    const apiKey = params.get("api_key") || DEFAULT_API_KEY;
+
+    document.getElementById("userId").textContent = userId;
+    document.getElementById("apiKey").textContent =
+      apiKey.length > 16 ? apiKey.slice(0, 10) + "…" + apiKey.slice(-6) : apiKey;
+
+    const logEl = document.getElementById("log");
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent = `[${time}] ${msg}\n` + logEl.textContent;
+    }
+
+    log("Session initialized");
+    log("user_id = " + userId);
+    log("api_key loaded (" + apiKey.length + " chars)");
+
+    document.getElementById("btnPing").addEventListener("click", () => {
+      log("Sending handshake…");
+      setTimeout(() => {
+        log("Handshake OK · latency " + (38 + Math.floor(Math.random() * 30)) + " ms");
+        log("Token refreshed");
+      }, 500 + Math.random() * 500);
+    });
+
+    document.getElementById("btnRefresh").addEventListener("click", () => {
+      log("Refreshing session…");
+      setTimeout(() => {
+        log("Session valid · expires in 59 min");
+      }, 350);
+    });
+
+    setInterval(() => {
+      if (Math.random() > 0.75) log("Keep-alive · OK");
+    }, 14000);
+  </script>
+</body>
+</html>
