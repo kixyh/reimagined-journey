@@ -12,6 +12,8 @@ async function r(...cmd) {
   return j.result;
 }
 
+const tfetch = (url, opt = {}, ms = 6000) => fetch(url, { ...opt, signal: AbortSignal.timeout(ms) });
+
 const sha = s => crypto.createHash('sha256').update(s + process.env.IP_SALT).digest('hex');
 const mask = ip => ip.slice(0, 5) + '•'.repeat(6);
 
@@ -21,6 +23,9 @@ function genKey() {
   return [part(), part(), part(), part()].join('-');
 }
 
+const WORDS = ['apple','river','cloud','stone','maple','tiger','piano','ocean','lemon','cactus','falcon','garden','candle','rocket','pebble','meadow','harbor','copper','velvet','thunder','marble','sunset','island','whisper','canyon','feather','lantern','orchard','pepper','saddle','timber','violet','walnut','yellow','zebra','anchor','bridge','castle','dragon','ember','forest','glacier','honey','igloo','jungle','kettle','ladder','magnet','nectar','olive','parrot','quartz','raven','silver','tunnel','umbrella','valley','willow','yogurt','zephyr','acorn','badger','coral','dolphin','eagle','fossil','ginger','hammer','iris','jasmine','koala','lotus','mango','nutmeg','orchid','panda','quill','radish','sparrow','tulip','vanilla','walrus','yarrow','bamboo','cobalt','dune','fern','grove','harvest','ivory','juniper','kiwi','lagoon','mist','nimbus','prairie','reef','sage','thistle'];
+const genPhrase = () => Array.from({ length: 6 }, () => WORDS[crypto.randomInt(WORDS.length)]).join(' ');
+
 function safeEq(a, b) {
   const A = Buffer.from(a), B = Buffer.from(b);
   return A.length === B.length && crypto.timingSafeEqual(A, B);
@@ -29,19 +34,24 @@ function safeEq(a, b) {
 const clientIp = req =>
   (req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',')[0] || '').trim();
 
+const getCookie = (req, name) => {
+  const m = (req.headers.cookie || '').match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return m ? m[1] : null;
+};
+
 // ---- admin sessions ----
 async function adminRole(req) {
   const t = (req.headers.authorization || '').replace('Bearer ', '');
   return t ? await r('GET', 'sess:' + t) : null;
 }
 
-// ---- user cookie sessions ----
+// ---- verified-user cookie sessions ----
 const sig = v => crypto.createHmac('sha256', process.env.SESSION_SECRET).update(v).digest('base64url');
 
 function readSess(req) {
-  const m = (req.headers.cookie || '').match(/(?:^|; )sess=([^;]+)/);
-  if (!m) return null;
-  const [v, s] = m[1].split('.');
+  const c = getCookie(req, 'sess');
+  if (!c) return null;
+  const [v, s] = c.split('.');
   if (!v || !s) return null;
   const a = Buffer.from(s), b = Buffer.from(sig(v));
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
@@ -78,4 +88,4 @@ async function validate(action, key, ip, user) {
   return { ok: true, expires: k.expires };
 }
 
-module.exports = { r, sha, mask, genKey, safeEq, clientIp, adminRole, readSess, sessCookie, validate };
+module.exports = { r, tfetch, sha, mask, genKey, genPhrase, safeEq, clientIp, getCookie, adminRole, readSess, sessCookie, validate };
