@@ -1,41 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reimagined Journey</title>
 <style>
-#adm-btn{position:fixed;top:12px;left:12px;z-index:9999;height:38px;padding:0 14px;border-radius:10px;border:1px solid #26262e;background:#131318;color:#f2f2f5;font:600 13px system-ui,sans-serif;cursor:pointer}
-#adm{position:fixed;top:0;left:0;bottom:0;width:min(380px,100vw);z-index:9998;background:#0f0f13;border-right:1px solid #26262e;color:#f2f2f5;font:14px system-ui,sans-serif;padding:60px 16px 16px;overflow:auto;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 40px rgba(0,0,0,.5)}
+:root{--bg:#09090b;--card:#131318;--card2:#1a1a21;--border:#26262e;--text:#f2f2f5;--muted:#8a8a96;--accent:#7c9cff;--danger:#ff6b6b;--ok:#4ade80;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:radial-gradient(900px 500px at 20% -10%,#1a2040 0%,transparent 60%),var(--bg);color:var(--text);min-height:100dvh}
+.hid{display:none!important}
+
+/* ---------- main site ---------- */
+#userbar{position:fixed;top:12px;right:12px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+#userbar img{width:26px;height:26px;border-radius:50%}
+#userbar a{color:var(--accent);text-decoration:none}
+#stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:70px 20px 20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:420px}
+.card h1{font-size:22px;margin-bottom:6px}
+.card p{color:var(--muted);font-size:14px;margin-bottom:20px}
+.card input{width:100%;height:46px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:0 14px;color:var(--text);font-size:16px;outline:none;margin-bottom:10px}
+.card input:focus{border-color:var(--accent)}
+.btn{display:block;width:100%;height:46px;line-height:46px;text-align:center;border:0;border-radius:12px;background:var(--accent);color:#000;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;padding:0}
+.err{color:var(--danger);font-size:13px;margin-top:10px;text-align:center}
+#content{max-width:800px;width:100%}
+
+/* ---------- admin drawer ---------- */
+#adm-btn{position:fixed;top:12px;left:12px;z-index:9999;height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font:600 13px system-ui,sans-serif;cursor:pointer}
+#adm{position:fixed;top:0;left:0;bottom:0;width:min(380px,100vw);z-index:9998;background:#0f0f13;border-right:1px solid var(--border);padding:60px 16px 16px;overflow:auto;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 40px rgba(0,0,0,.5);font-size:14px}
 #adm.open{transform:none}
-#adm *{box-sizing:border-box}
-#adm h3{font-size:12px;color:#8a8a96;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px}
-#adm input{width:100%;height:42px;background:#1a1a21;border:1px solid #26262e;border-radius:10px;padding:0 12px;color:#f2f2f5;font-size:15px;outline:none;margin-bottom:8px}
-#adm input:focus{border-color:#7c9cff}
-#adm button{height:40px;border:0;border-radius:10px;background:#7c9cff;color:#000;font-weight:600;cursor:pointer;padding:0 14px;width:100%}
-#adm button.d{background:transparent;border:1px solid #4a2a2a;color:#ff6b6b;height:28px;font-size:12px;width:auto;margin-top:8px}
-#adm button.g{background:transparent;border:1px solid #26262e;color:#f2f2f5}
-#adm .hid{display:none}
-#adm .err{color:#ff6b6b;font-size:13px;margin-top:6px}
-#adm .m{color:#8a8a96;font-size:12px}
-#adm .it{background:#1a1a21;border:1px solid #26262e;border-radius:12px;padding:10px;margin-bottom:8px}
-#adm .tp{display:flex;justify-content:space-between;align-items:center}
+#adm h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px}
+#adm input{width:100%;height:42px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:0 12px;color:var(--text);font-size:15px;outline:none;margin-bottom:8px}
+#adm input:focus{border-color:var(--accent)}
+#adm button{height:40px;border:0;border-radius:10px;background:var(--accent);color:#000;font-weight:600;cursor:pointer;padding:0 14px;width:100%}
+#adm button.d{background:transparent;border:1px solid #4a2a2a;color:var(--danger);height:28px;font-size:12px;width:auto;margin-top:8px}
+#adm button.g{background:transparent;border:1px solid var(--border);color:var(--text);width:auto;height:30px}
+#adm .m{color:var(--muted);font-size:12px}
+#adm .it{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
+#adm .tp,#adm .row{display:flex;justify-content:space-between;align-items:center}
+#adm .row{margin-top:6px}
 #adm .k{font-family:ui-monospace,monospace;font-size:13px;cursor:pointer}
 #adm .p{font-size:11px;padding:2px 8px;border-radius:99px}
-#adm .p.waiting{background:#2b2512;color:#fbbf24}#adm .p.locked{background:#112a1b;color:#4ade80}
-#adm .big{background:#1a1a21;border:1px dashed #26262e;border-radius:12px;padding:14px;text-align:center;margin-top:10px}
+#adm .p.waiting{background:#2b2512;color:var(--warn)}
+#adm .p.locked{background:#112a1b;color:var(--ok)}
+#adm .big{background:var(--card2);border:1px dashed var(--border);border-radius:12px;padding:14px;text-align:center;margin-top:10px}
 #adm .big .k{font-size:19px;letter-spacing:1.5px}
 #adm .tm{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px}
-#adm .row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
 #adm img{width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:6px}
+#adm .err{margin-top:6px;text-align:left}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:8px}
 </style>
+</head>
+<body>
 
+<!-- ============ ADMIN (top-left) ============ -->
 <button id="adm-btn">☰ Admin</button>
 <div id="adm">
   <div id="a-login">
     <h3 style="margin-top:0">Staff login</h3>
-    <input id="a-pw" type="password" placeholder="Password" />
+    <input id="a-pw" type="password" placeholder="Password" autocomplete="current-password" />
     <button id="a-go">Unlock</button>
     <div id="a-err" class="err hid"></div>
   </div>
 
   <div id="a-main" class="hid">
     <div class="row" style="margin-top:0">
-      <b id="a-role"></b><button class="g" id="a-out" style="width:auto;height:30px">Log out</button>
+      <b id="a-role"></b><button class="g" id="a-out">Log out</button>
     </div>
 
     <h3>Generate key</h3>
@@ -56,23 +85,95 @@
   </div>
 </div>
 
+<!-- ============ MAIN SITE ============ -->
+<div id="userbar" class="hid"></div>
+<div id="stage"></div>
+
 <script>
+/* =================== MAIN SITE =================== */
+const $ = s => document.querySelector(s);
+const h = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [s / 3600 | 0, s % 3600 / 60 | 0, s % 60].map(n => String(n).padStart(2, '0')).join(':'); };
+const av = u => /^https:\/\/[\w.-]+\.rbxcdn\.com\//.test((u && u.avatar) || '') ? u.avatar : '';
+
+let unlockedShown = false;
+
+function renderBar(user) {
+  const b = $('#userbar'); b.replaceChildren();
+  if (!user) { b.classList.add('hid'); return; }
+  b.classList.remove('hid');
+  const s = av(user); if (s) { const i = h('img'); i.src = s; b.append(i); }
+  const lo = h('a', null, 'Log out'); lo.href = '/api/auth/logout';
+  b.append(h('span', null, user.name), lo);
+}
+
+function gate(content) {
+  const st = $('#stage'); st.replaceChildren(); unlockedShown = false;
+  const c = h('div', 'card'); c.append(...content); st.append(c);
+}
+
+async function check() {
+  let d;
+  try { d = await (await fetch('/api/me')).json(); } catch { return; }
+  renderBar(d.user);
+
+  // step 1: Roblox username
+  if (!d.user) {
+    if ($('#rbIn')) return; // don't wipe what they're typing
+    const i = h('input'); i.id = 'rbIn'; i.placeholder = 'Roblox username'; i.autocomplete = 'off';
+    const b = h('button', 'btn', 'Continue');
+    const msg = h('div', 'err hid');
+    const go = async () => {
+      b.textContent = 'Checking...';
+      const r = await fetch('/api/auth/roblox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: i.value }) });
+      const j = await r.json(); b.textContent = 'Continue';
+      if (j.ok) check(); else { msg.textContent = j.error || 'Failed'; msg.classList.remove('hid'); }
+    };
+    b.onclick = go; i.addEventListener('keydown', e => e.key === 'Enter' && go());
+    return gate([h('h1', null, 'Welcome'), h('p', null, 'Enter your Roblox username to continue.'), i, b, msg]);
+  }
+
+  // step 2: key
+  if (!d.unlocked) {
+    if ($('#keyIn') && !d.error) return;
+    const i = h('input'); i.id = 'keyIn'; i.placeholder = 'XXXX-XXXX-XXXX-XXXX'; i.autocomplete = 'off';
+    const b = h('button', 'btn', 'Redeem key');
+    const msg = h('div', 'err', d.error || ''); if (!d.error) msg.classList.add('hid');
+    const go = async () => {
+      b.textContent = 'Checking...';
+      const r = await fetch('/api/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: i.value }) });
+      const j = await r.json(); b.textContent = 'Redeem key';
+      if (j.ok) check(); else { msg.textContent = j.error || 'Invalid key'; msg.classList.remove('hid'); }
+    };
+    b.onclick = go; i.addEventListener('keydown', e => e.key === 'Enter' && go());
+    return gate([h('h1', null, 'Enter your key'), h('p', null, 'Open a ticket in the Discord server to get one. Keys last 2 hours and lock to your IP.'), i, b, msg]);
+  }
+
+  // step 3: unlocked, load protected content once
+  if (!unlockedShown) {
+    const r = await fetch('/api/content');
+    if (!r.ok) return;
+    const j = await r.json();
+    const st = $('#stage'); st.replaceChildren();
+    const box = h('div'); box.id = 'content'; box.innerHTML = j.html; // html comes from your own api/content.js
+    st.append(box); unlockedShown = true;
+  }
+}
+check(); setInterval(check, 30000);
+
+/* =================== ADMIN DRAWER =================== */
 (() => {
-  const $ = s => document.querySelector(s);
-  const h = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
-  const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [s / 3600 | 0, s % 3600 / 60 | 0, s % 60].map(n => String(n).padStart(2, '0')).join(':'); };
-  const av = u => (u && /^\d+$/.test(u.id || '') && /^\w+$/.test(u.avatar || '')) ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64` : '';
   let tok = sessionStorage.getItem('atok'), role = sessionStorage.getItem('arole'), st = { keys: [], online: [] }, poll;
 
   async function api(p, opt = {}) {
-    const r = await fetch('/api/admin?p=' + p, { ...opt, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok } });
-    if (r.status === 401 && p === 'panel') { logout(); throw 0; }
+    const r = await fetch('/api/' + p, { ...opt, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok } });
+    if (r.status === 401) { logout(); throw 0; }
     return r.json();
   }
   const copy = (t, el) => { navigator.clipboard.writeText(t); const o = el.textContent; el.textContent = 'Copied!'; setTimeout(() => el.textContent = o, 900); };
 
   function logout() {
-    sessionStorage.clear(); tok = null; clearInterval(poll);
+    sessionStorage.removeItem('atok'); sessionStorage.removeItem('arole'); tok = null; clearInterval(poll);
     $('#a-main').classList.add('hid'); $('#a-login').classList.remove('hid');
   }
   function show() {
@@ -84,7 +185,7 @@
   $('#adm-btn').onclick = () => $('#adm').classList.toggle('open');
   $('#a-out').onclick = logout;
   $('#a-go').onclick = async () => {
-    const r = await fetch('/api/admin?p=login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('#a-pw').value }) });
+    const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('#a-pw').value }) });
     const d = await r.json();
     if (!r.ok) { $('#a-err').textContent = d.error || 'Failed'; $('#a-err').classList.remove('hid'); return; }
     tok = d.token; role = d.role; sessionStorage.setItem('atok', tok); sessionStorage.setItem('arole', role);
@@ -126,7 +227,8 @@
     const ol = $('#a-online'); ol.replaceChildren();
     if (!st.online.length) ol.append(h('div', 'm', 'Nobody online'));
     st.online.forEach(u => {
-      const r = h('div', 'it'); const s = av(u); if (s) { const i = h('img'); i.src = s; r.append(i); }
+      const r = h('div', 'it'); r.append(h('span', 'dot'));
+      const s = av(u); if (s) { const i = h('img'); i.src = s; r.append(i); }
       r.append(u.name || 'unknown'); ol.append(r);
     });
     tick();
@@ -141,853 +243,5 @@
   if (tok) show();
 })();
 </script>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Velocity-Net" />
-  <meta name="theme-color" content="#000000" />
-  <title>Velocity-Net</title>
-  <style>
-    :root {
-      --bg: #000;
-      --raised: #0f0f11;
-      --raised-2: #18181b;
-      --line: #26262a;
-      --text: #f5f5f6;
-      --muted: #8d8d94;
-      --accent: #9db7ff;
-      --danger: #ff7272;
-      --safe-t: env(safe-area-inset-top, 0px);
-      --safe-b: env(safe-area-inset-bottom, 0px);
-      --safe-l: env(safe-area-inset-left, 0px);
-      --safe-r: env(safe-area-inset-right, 0px);
-      color-scheme: dark;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-text-size-adjust: 100%; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
-      line-height: 1.4;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body.lock { overflow: hidden; }
-    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; touch-action: manipulation; }
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    svg { display: block; }
-
-    /* Header */
-    .top {
-      position: sticky; top: 0; z-index: 40;
-      padding: calc(var(--safe-t) + 10px) calc(var(--safe-r) + 12px) 0 calc(var(--safe-l) + 12px);
-      background: rgba(0, 0, 0, 0.82);
-      -webkit-backdrop-filter: blur(18px) saturate(1.4);
-      backdrop-filter: blur(18px) saturate(1.4);
-      border-bottom: 1px solid var(--line);
-    }
-    .row { display: flex; align-items: center; gap: 10px; }
-    .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .logo {
-      width: 44px; height: 44px; border-radius: 13px;
-      background: var(--raised); border: 1px solid var(--line);
-      display: grid; place-items: center;
-    }
-    .logo svg { width: 24px; height: 24px; }
-    h1 {
-      position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
-      font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
-    }
-    @media (min-width: 560px) {
-      h1 { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
-    }
-
-    .search { display: flex; flex: 1; gap: 8px; min-width: 0; }
-    .field { position: relative; flex: 1; min-width: 0; }
-    .field input {
-      width: 100%; height: 44px;
-      background: var(--raised); color: var(--text);
-      border: 1px solid var(--line); border-radius: 14px;
-      padding: 0 40px 0 14px;
-      font: inherit; font-size: 16px; /* 16px stops iOS zooming on focus */
-      outline: none;
-      transition: border-color .15s;
-    }
-    .field input::placeholder { color: #5d5d64; }
-    .field input::-webkit-search-cancel-button { display: none; }
-    .field input:focus { border-color: var(--accent); }
-    .clear {
-      position: absolute; right: 6px; top: 6px;
-      width: 32px; height: 32px; border-radius: 50%;
-      display: grid; place-items: center; color: var(--muted);
-    }
-    .clear[hidden] { display: none; }
-    .go {
-      width: 44px; height: 44px; border-radius: 14px;
-      background: #fff; color: #000; display: grid; place-items: center; flex-shrink: 0;
-      transition: transform .12s;
-    }
-    .go:active { transform: scale(.94); }
-
-    .filters {
-      display: flex; gap: 6px; align-items: center;
-      overflow-x: auto; scrollbar-width: none;
-      padding: 10px 0 12px;
-    }
-    .filters::-webkit-scrollbar { display: none; }
-    .seg {
-      display: inline-flex; flex-shrink: 0;
-      background: var(--raised); border: 1px solid var(--line);
-      border-radius: 999px; padding: 3px;
-    }
-    .seg button {
-      padding: 6px 9px; border-radius: 999px;
-      font-size: 12.5px; color: var(--muted); white-space: nowrap;
-      transition: background .15s, color .15s;
-    }
-    .seg button[aria-pressed="true"] { background: #fff; color: #000; font-weight: 600; }
-
-    .bar {
-      position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
-      overflow: hidden; opacity: 0; transition: opacity .2s; pointer-events: none;
-    }
-    .top.busy .bar { opacity: 1; }
-    .bar::before {
-      content: ""; position: absolute; inset: 0; width: 35%;
-      background: var(--accent); animation: slide 1s ease-in-out infinite;
-    }
-    @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
-
-    .meta {
-      padding: 12px calc(var(--safe-r) + 16px) 2px calc(var(--safe-l) + 16px);
-      min-height: 30px;
-      font-size: 13px; color: var(--muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      font-variant-numeric: tabular-nums;
-    }
-    .meta b { color: var(--text); font-weight: 600; }
-
-    /* Masonry grid */
-    #grid {
-      display: flex; gap: 8px;
-      padding: 8px calc(var(--safe-r) + 10px) 0 calc(var(--safe-l) + 10px);
-    }
-    .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-    .tile {
-      position: relative; display: block; width: 100%;
-      aspect-ratio: var(--ar, 1);
-      border-radius: 12px; overflow: hidden;
-      background: var(--raised-2);
-      -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-      transition: transform .15s;
-    }
-    .tile:active { transform: scale(.98); }
-    .tile img {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: cover; opacity: 0; transition: opacity .4s;
-    }
-    .tile.ready img { opacity: 1; }
-    .tile::before {
-      content: ""; position: absolute; inset: 0;
-      background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.06) 50%, transparent 70%);
-      background-size: 250% 100%;
-      animation: shimmer 1.4s linear infinite;
-    }
-    .tile.ready::before, .tile.broken::before { display: none; }
-    .tile.skel { pointer-events: none; }
-    .tile.broken img { display: none; }
-    .tile.broken::after {
-      content: "Preview unavailable";
-      position: absolute; inset: 0; display: grid; place-items: center;
-      font-size: 12px; color: var(--muted);
-    }
-    @keyframes shimmer { from { background-position: 150% 0; } to { background-position: -100% 0; } }
-    .pill {
-      position: absolute; display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11px; line-height: 1; padding: 5px 8px; border-radius: 999px;
-      background: rgba(0,0,0,.62); color: #fff;
-      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-      font-variant-numeric: tabular-nums;
-    }
-    .pill svg { width: 11px; height: 11px; }
-    .pill.score { left: 6px; bottom: 6px; }
-    .pill.score svg { color: var(--accent); }
-    .pill.vid { right: 6px; top: 6px; padding: 6px; }
-
-    /* Empty, error, footer */
-    #state { max-width: 440px; margin: 0 auto; padding: 56px 24px 24px; text-align: center; }
-    #state[hidden] { display: none; }
-    #state h2 { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
-    #state p { margin: 8px auto 0; font-size: 14px; color: var(--muted); max-width: 36ch; overflow-wrap: anywhere; }
-    #state .actions { margin-top: 18px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-    .btn {
-      padding: 11px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
-      background: #fff; color: #000;
-    }
-    .btn.quiet { background: var(--raised-2); color: var(--text); border: 1px solid var(--line); font-weight: 500; }
-    .btn:active { opacity: .85; }
-    .recent { margin-top: 32px; }
-    .recent .head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-    .recent .head button { color: var(--muted); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-    .chip {
-      max-width: 100%; padding: 7px 12px; border-radius: 999px;
-      background: var(--raised-2); border: 1px solid var(--line);
-      font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .chip:active { background: #222226; }
-    .err-text { color: var(--danger); }
-
-    #foot {
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      padding: 28px 20px calc(36px + var(--safe-b));
-      font-size: 13px; color: var(--muted); text-align: center; min-height: 60px;
-    }
-    .spin {
-      width: 22px; height: 22px; border-radius: 50%;
-      border: 2px solid var(--line); border-top-color: var(--text);
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Viewer */
-    .viewer { position: fixed; inset: 0; z-index: 100; background: #000; display: flex; flex-direction: column; }
-    .viewer[hidden] { display: none; }
-    .v-top {
-      position: absolute; z-index: 3; top: 0; left: 0; right: 0;
-      display: flex; align-items: center; gap: 10px;
-      padding: calc(var(--safe-t) + 10px) calc(var(--safe-r) + 12px) 26px calc(var(--safe-l) + 12px);
-      background: linear-gradient(rgba(0,0,0,.7), transparent);
-      pointer-events: none;
-    }
-    .v-top > * { pointer-events: auto; }
-    .icon-btn {
-      width: 42px; height: 42px; border-radius: 50%;
-      display: grid; place-items: center; flex-shrink: 0;
-      background: rgba(255,255,255,.14);
-      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-      color: #fff;
-    }
-    .icon-btn[aria-pressed="true"] { background: #fff; color: #000; }
-    .v-count { flex: 1; text-align: center; font-size: 13px; color: #d0d0d4; font-variant-numeric: tabular-nums; pointer-events: none; }
-    .v-stage {
-      position: relative; flex: 1; min-height: 0;
-      display: flex; align-items: center; justify-content: center;
-      padding: calc(var(--safe-t) + 64px) 8px 8px;
-    }
-    .v-stage img, .v-stage video {
-      max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px;
-      animation: fade .25s;
-    }
-    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-    .v-stage.busy::after {
-      content: ""; position: absolute; width: 26px; height: 26px; border-radius: 50%;
-      border: 2px solid #333; border-top-color: #fff; animation: spin .8s linear infinite;
-    }
-    .v-stage.failed::after { content: "This file couldn't be loaded"; font-size: 14px; color: var(--muted); }
-    .nav {
-      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-      width: 46px; height: 46px; border-radius: 50%;
-      display: grid; place-items: center;
-      background: rgba(255,255,255,.12); color: #fff;
-    }
-    .nav.prev { left: 14px; } .nav.next { right: 14px; }
-    .nav:disabled { opacity: .2; cursor: default; }
-    @media (hover: none) { .nav { display: none; } }
-
-    .sheet {
-      background: var(--raised); border-top: 1px solid var(--line);
-      border-radius: 20px 20px 0 0;
-      padding: 16px calc(var(--safe-r) + 16px) calc(16px + var(--safe-b)) calc(var(--safe-l) + 16px);
-      max-height: 46dvh; overflow-y: auto;
-      -webkit-user-select: text; user-select: text;
-    }
-    .sheet[hidden] { display: none; }
-    .stats { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 14px; }
-    .stats dt { font-size: 12px; color: var(--muted); }
-    .stats dd { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
-    .sheet .chips { justify-content: flex-start; }
-    .sheet .more { margin-top: 12px; font-size: 13px; color: var(--accent); }
-    .sheet .none { font-size: 13px; color: var(--muted); }
-
-
-
-    /* Password gate */
-    .gate {
-      position: fixed; inset: 0; z-index: 150; background: #000;
-      display: flex; align-items: center; justify-content: center;
-      padding: calc(var(--safe-t) + 24px) calc(var(--safe-r) + 24px) calc(var(--safe-b) + 24px) calc(var(--safe-l) + 24px);
-      overflow-y: auto;
-    }
-    .gate[hidden] { display: none; }
-    .gate form { width: 100%; max-width: 340px; text-align: center; }
-    .gate .logo { margin: 0 auto 22px; width: 64px; height: 64px; border-radius: 19px; }
-    .gate .logo svg { width: 32px; height: 32px; }
-    .gate h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-    .gate p { margin: 8px 0 22px; font-size: 14px; color: var(--muted); }
-    .gate input {
-      width: 100%; height: 48px; padding: 0 14px; margin-bottom: 10px;
-      background: var(--raised); color: var(--text);
-      border: 1px solid var(--line); border-radius: 14px;
-      font: inherit; font-size: 16px; outline: none; text-align: center;
-    }
-    .gate input:focus { border-color: var(--accent); }
-    .gate .btn { width: 100%; height: 48px; border-radius: 14px; font-size: 15px; }
-    .gate .btn:disabled { opacity: .5; }
-    .gate .gate-err { min-height: 20px; margin-top: 12px; font-size: 13px; color: var(--danger); }
-
-    /* Opening splash */
-    #splash {
-      position: fixed; inset: 0; z-index: 200; background: #000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
-      transition: opacity .45s ease, visibility .45s;
-    }
-    #splash.out { opacity: 0; visibility: hidden; }
-    #splash svg { width: 84px; height: 84px; overflow: visible; filter: drop-shadow(0 0 14px rgba(255,255,255,.35)); }
-    #splash polygon { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .9s cubic-bezier(.6,.1,.2,1) .15s forwards; }
-    #splash span {
-      font-size: 22px; font-weight: 700; letter-spacing: .02em; color: #fff;
-      opacity: 0; transform: translateY(6px); animation: rise .6s ease .7s forwards;
-    }
-    @keyframes draw { to { stroke-dashoffset: 0; } }
-    @keyframes rise { to { opacity: 1; transform: none; } }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-      .bar::before { width: 100%; }
-    }
-  </style>
-</head>
-<body>
-  <div id="splash" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round">
-      <polygon pathLength="1" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-    <span>Velocity-Net</span>
-  </div>
-  <div class="gate" id="gate">
-    <form id="gateForm">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      </div>
-      <h2>Members only</h2>
-      <p>Enter the password from the Discord server to get in.</p>
-      <label class="sr-only" for="gatePw">Password</label>
-      <input id="gatePw" type="password" autocomplete="current-password" placeholder="Password" required />
-      <button type="submit" class="btn" id="gateBtn">Unlock</button>
-      <div class="gate-err" id="gateErr" role="alert"></div>
-    </form>
-  </div>
-
-  <header class="top" id="top">
-    <div class="row">
-      <div class="brand">
-        <div class="logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-        </div>
-        <h1>Velocity-Net</h1>
-      </div>
-      <form class="search" id="form" role="search">
-        <div class="field">
-          <label class="sr-only" for="tags">Search tags</label>
-          <input id="tags" type="search" enterkeyhint="search" placeholder="Search tags, e.g. blue_sky -rain"
-                 autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
-          <button type="button" class="clear" id="btnClear" aria-label="Clear search" hidden data-icon="close"></button>
-        </div>
-        <button type="submit" class="go" id="btnSearch" aria-label="Search" data-icon="search"></button>
-      </form>
-    </div>
-    <div class="filters">
-      <div class="seg" role="group" aria-label="Rating" id="ratingSeg">
-        <button type="button" data-rating="" aria-pressed="true">All</button>
-        <button type="button" data-rating="safe" aria-pressed="false">Safe</button>
-        <button type="button" data-rating="questionable" aria-pressed="false">Questionable</button>
-        <button type="button" data-rating="explicit" aria-pressed="false">Explicit</button>
-      </div>
-      <div class="seg" role="group" aria-label="Sort" id="sortSeg">
-        <button type="button" data-sort="" aria-pressed="true">Newest</button>
-        <button type="button" data-sort="score" aria-pressed="false">Top</button>
-      </div>
-    </div>
-    <div class="bar" aria-hidden="true"></div>
-  </header>
-
-  <p class="meta" id="meta" role="status" aria-live="polite"></p>
-  <main id="grid" aria-label="Results"></main>
-  <section id="state" hidden></section>
-  <div id="sentinel" aria-hidden="true"></div>
-  <footer id="foot"></footer>
-
-  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Post viewer" hidden>
-    <div class="v-top">
-      <button type="button" class="icon-btn" id="vClose" aria-label="Close viewer" data-icon="close"></button>
-      <div class="v-count" id="vCount"></div>
-      <a class="icon-btn" id="vOpen" target="_blank" rel="noopener noreferrer" aria-label="Open original file" data-icon="external"></a>
-      <button type="button" class="icon-btn" id="vInfo" aria-label="Show details" aria-pressed="false" data-icon="info"></button>
-    </div>
-    <div class="v-stage" id="vStage">
-      <button type="button" class="nav prev" id="vPrev" aria-label="Previous post" data-icon="left"></button>
-      <button type="button" class="nav next" id="vNext" aria-label="Next post" data-icon="right"></button>
-    </div>
-    <section class="sheet" id="vSheet" hidden></section>
-  </div>
-
-  <script>
-    // The Rule34 key now lives on the server (see api/posts.js).
-    const PAGE_SIZE = 40;
-
-    /* ---------- helpers ---------- */
-    const $ = id => document.getElementById(id);
-    const ICONS = {
-      search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
-      close: '<path d="M6 6l12 12M18 6 6 18"/>',
-      info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
-      external: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
-      left: '<path d="m15 5-7 7 7 7"/>',
-      right: '<path d="m9 5 7 7-7 7"/>',
-      up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
-      play: '<path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/>'
-    };
-    const svg = (name, size = 20) =>
-      `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
-    document.querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = svg(el.dataset.icon, el.classList.contains("clear") ? 18 : 20); });
-
-    function h(tag, props = {}, ...kids) {
-      const el = document.createElement(tag);
-      for (const [k, v] of Object.entries(props)) {
-        if (k === "class") el.className = v;
-        else if (k === "text") el.textContent = v;
-        else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
-        else el.setAttribute(k, v);
-      }
-      kids.flat().forEach(c => c != null && el.append(c));
-      return el;
-    }
-    const store = {
-      get(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } },
-      set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
-    };
-    const isVideo = p => /\.(mp4|webm)$/i.test(p.file_url || "");
-    const isGif = p => /\.gif$/i.test(p.file_url || "");
-
-    /* ---------- state ---------- */
-    const prefs = store.get("vn:prefs", {});
-    const state = {
-      base: "", page: 0, posts: [], done: false, loading: false,
-      searched: false, ctrl: null, footError: null,
-      rating: prefs.rating || "", sort: prefs.sort || ""
-    };
-    const topEl = $("top"), input = $("tags"), btnClear = $("btnClear"), meta = $("meta");
-    const grid = $("grid"), stateEl = $("state"), foot = $("foot"), sentinel = $("sentinel");
-
-    /* ---------- filters ---------- */
-    function syncFilters() {
-      document.querySelectorAll("[data-rating]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.rating === state.rating)));
-      document.querySelectorAll("[data-sort]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.sort === state.sort)));
-    }
-    function applyFilter(key, value) {
-      state[key] = value;
-      store.set("vn:prefs", { rating: state.rating, sort: state.sort });
-      syncFilters();
-      if (state.searched) runSearch(input.value);
-    }
-    document.querySelectorAll("[data-rating]").forEach(b => b.addEventListener("click", () => applyFilter("rating", b.dataset.rating)));
-    document.querySelectorAll("[data-sort]").forEach(b => b.addEventListener("click", () => applyFilter("sort", b.dataset.sort)));
-    syncFilters();
-
-    function queryFor(base) {
-      const parts = base.trim().split(/\s+/).filter(Boolean);
-      if (state.rating && !parts.some(p => /^rating:/i.test(p))) parts.push("rating:" + state.rating);
-      if (state.sort === "score" && !parts.some(p => /^sort:/i.test(p))) parts.push("sort:score");
-      return parts.join(" ");
-    }
-
-    /* ---------- masonry ---------- */
-    let cols = [], colH = [], tiles = [], skel = [];
-    const colCount = () => Math.min(6, Math.max(2, Math.floor((grid.clientWidth || window.innerWidth) / 180)));
-    function layout(force) {
-      const n = colCount();
-      if (!force && n === cols.length) return;
-      grid.replaceChildren();
-      cols = Array.from({ length: n }, () => h("div", { class: "col" }));
-      colH = new Array(n).fill(0);
-      grid.append(...cols);
-      tiles.forEach(t => place(t.el, t.ratio));
-    }
-    function place(el, ratio) {
-      let i = 0;
-      for (let c = 1; c < colH.length; c++) if (colH[c] < colH[i]) i = c;
-      cols[i].append(el);
-      colH[i] += 1 / ratio + 0.04;
-    }
-    new ResizeObserver(() => { if (tiles.length) layout(false); }).observe(grid);
-
-    const SK = [1, 0.75, 1.1, 0.8, 0.95, 0.7, 1.05, 0.85];
-    function showSkeleton() {
-      skel = SK.map(r => {
-        const d = h("div", { class: "tile skel" });
-        d.style.setProperty("--ar", r);
-        place(d, r);
-        return d;
-      });
-    }
-    function clearTiles() { tiles = []; skel = []; layout(true); }
-
-    function makeTile(post, index) {
-      const w = +post.width || 0, hgt = +post.height || 0;
-      const ratio = Math.min(1.8, Math.max(0.55, w && hgt ? w / hgt : 1));
-      const btn = h("button", { type: "button", class: "tile", "aria-label": `Open post ${post.id}` });
-      btn.style.setProperty("--ar", ratio.toFixed(3));
-      const thumb = post.preview_url || post.sample_url || post.file_url;
-      if (thumb) {
-        const img = new Image();
-        img.alt = ""; img.decoding = "async"; img.loading = "lazy";
-        img.addEventListener("load", () => btn.classList.add("ready"));
-        img.addEventListener("error", () => btn.classList.add("broken"));
-        img.src = thumb;
-        btn.append(img);
-      } else btn.classList.add("broken");
-      if (post.score != null && post.score !== "") btn.append(h("span", { class: "pill score" }, svgEl("up"), String(post.score)));
-      if (isVideo(post)) btn.append(h("span", { class: "pill vid", "aria-label": "Video" }, svgEl("play")));
-      btn.addEventListener("click", () => openViewer(index));
-      return { el: btn, ratio };
-    }
-    function svgEl(name) { const s = document.createElement("span"); s.innerHTML = svg(name, 11); return s.firstChild; }
-
-    function addPosts(list) {
-      const seen = new Set(state.posts.map(p => p.id));
-      for (const post of list) {
-        if (seen.has(post.id)) continue;
-        seen.add(post.id);
-        state.posts.push(post);
-        const t = makeTile(post, state.posts.length - 1);
-        tiles.push(t);
-        place(t.el, t.ratio);
-      }
-    }
-
-    /* ---------- recent searches ---------- */
-    function saveRecent(q) {
-      if (!q) return;
-      const list = store.get("vn:recent", []).filter(x => x !== q);
-      list.unshift(q);
-      store.set("vn:recent", list.slice(0, 8));
-    }
-
-    /* ---------- state panel & footer ---------- */
-    function hideState() { stateEl.hidden = true; stateEl.replaceChildren(); }
-    function showState(kind, msg) {
-      stateEl.replaceChildren();
-      stateEl.hidden = false;
-      if (kind === "start") {
-        stateEl.append(
-          h("h2", { text: "Search by tag" }),
-          h("p", { text: "Separate tags with spaces. Use underscores inside a tag (blue_sky) and a minus to leave one out (-rain). Leave the box empty to see the newest posts." })
-        );
-        const recent = store.get("vn:recent", []);
-        if (recent.length) {
-          stateEl.append(h("div", { class: "recent" },
-            h("div", { class: "head" }, h("span", { text: "Recent searches" }),
-              h("button", { type: "button", text: "Clear", onclick: () => { store.set("vn:recent", []); showState("start"); } })),
-            h("div", { class: "chips" }, recent.map(r => h("button", { type: "button", class: "chip", text: r, onclick: () => { input.value = r; syncClear(); runSearch(r); } })))
-          ));
-        }
-      } else if (kind === "none") {
-        stateEl.append(
-          h("h2", { text: "No posts found" }),
-          h("p", { text: "Try fewer tags or check the spelling. Tags use underscores, like blue_sky." })
-        );
-        if (state.rating || state.sort) {
-          stateEl.append(h("div", { class: "actions" }, h("button", { type: "button", class: "btn quiet", text: "Reset filters", onclick: () => {
-            state.rating = ""; state.sort = ""; store.set("vn:prefs", {}); syncFilters(); runSearch(input.value);
-          } })));
-        }
-      } else if (kind === "error") {
-        stateEl.append(
-          h("h2", { text: "Couldn't load posts" }),
-          h("p", { class: "err-text", text: msg }),
-          h("div", { class: "actions" }, h("button", { type: "button", class: "btn", text: "Try again", onclick: () => runSearch(state.base) }))
-        );
-      }
-    }
-    function renderFoot() {
-      foot.replaceChildren();
-      if (!state.posts.length) return;
-      if (state.loading) foot.append(h("div", { class: "spin", role: "status", "aria-label": "Loading more" }));
-      else if (state.footError) foot.append(
-        h("span", { class: "err-text", text: state.footError }),
-        h("button", { type: "button", class: "btn quiet", text: "Try again", onclick: () => { state.footError = null; loadMore(); } })
-      );
-      else if (state.done) foot.append(h("span", { text: "That's all the posts for this search." }));
-    }
-    function updateMeta() {
-      meta.replaceChildren();
-      if (!state.searched) return;
-      if (!state.posts.length) { if (state.loading) meta.textContent = "Searching…"; return; }
-      meta.append(h("b", { text: String(state.posts.length) }), ` posts${state.base ? " for " + state.base : ""}`);
-    }
-
-    /* ---------- fetching ---------- */
-    function buildUrl(tags, pid = 0) {
-      const params = new URLSearchParams({ tags: tags || "", pid: String(pid) });
-      return `/api/posts?${params.toString()}`;
-    }
-    async function fetchPage(tags, pid, signal) {
-      const res = await fetch(buildUrl(tags, pid), { signal });
-      if (res.status === 401) { showGate(); throw new Error("LOCKED"); }
-      const text = (await res.text()).trim();
-      if (!res.ok) throw new Error(`The server answered with status ${res.status}.`);
-      if (!text) return []; // the API sends an empty body when nothing matches
-      let data;
-      try { data = JSON.parse(text); } catch { throw new Error(text.slice(0, 160)); }
-      if (Array.isArray(data)) return data;
-      throw new Error((data && data.message) || "The server sent an unexpected response.");
-    }
-
-    async function runSearch(base, { reset = true } = {}) {
-      if (reset) {
-        if (state.ctrl) state.ctrl.abort();
-        state.base = base.trim();
-        state.page = 0; state.done = false; state.posts = []; state.footError = null; state.searched = true;
-        saveRecent(state.base);
-        clearTiles(); showSkeleton(); hideState();
-        window.scrollTo(0, 0);
-      } else if (state.loading || state.done) return;
-
-      const page = reset ? 0 : state.page + 1;
-      const ctrl = new AbortController();
-      state.ctrl = ctrl; state.loading = true;
-      topEl.classList.add("busy");
-      updateMeta(); renderFoot();
-
-      try {
-        const data = await fetchPage(queryFor(state.base), page, ctrl.signal);
-        if (ctrl.signal.aborted) return;
-        if (reset) clearTiles();
-        state.page = page;
-        if (!data.length) {
-          state.done = true;
-          if (!state.posts.length) showState("none");
-        } else {
-          addPosts(data);
-          if (data.length < PAGE_SIZE) state.done = true;
-        }
-      } catch (err) {
-        if (err.name === "AbortError") return;
-        if (err.message === "LOCKED") { clearTiles(); return; }
-        const msg = err instanceof TypeError ? "Couldn't reach the server. Check your connection and try again." : err.message;
-        if (reset || !state.posts.length) { clearTiles(); showState("error", msg); }
-        else state.footError = msg;
-      } finally {
-        if (state.ctrl === ctrl) {
-          state.loading = false;
-          topEl.classList.remove("busy");
-          updateMeta(); renderFoot();
-          requestAnimationFrame(() => requestAnimationFrame(maybeFill));
-        }
-      }
-    }
-    const loadMore = () => runSearch(state.base, { reset: false });
-    function maybeFill() {
-      if (!state.searched || !state.posts.length || state.loading || state.done || state.footError) return;
-      if (sentinel.getBoundingClientRect().top < window.innerHeight + 1400) loadMore();
-    }
-    new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) maybeFill(); }, { rootMargin: "1400px 0px" }).observe(sentinel);
-
-    /* ---------- search form ---------- */
-    function syncClear() { btnClear.hidden = !input.value; }
-    input.addEventListener("input", syncClear);
-    btnClear.addEventListener("click", () => { input.value = ""; syncClear(); input.focus(); });
-    $("form").addEventListener("submit", e => { e.preventDefault(); input.blur(); runSearch(input.value); });
-    document.addEventListener("keydown", e => {
-      if (e.key === "/" && viewer.hidden && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); input.focus(); }
-    });
-
-    /* ---------- viewer ---------- */
-    const viewer = $("viewer"), vStage = $("vStage"), vSheet = $("vSheet"), vInfo = $("vInfo");
-    let vIndex = -1, lastFocus = null, sheetOpen = false;
-
-    function openViewer(i) {
-      lastFocus = document.activeElement;
-      vIndex = i;
-      viewer.hidden = false;
-      document.body.classList.add("lock");
-      renderViewer();
-      $("vClose").focus({ preventScroll: true });
-    }
-    function closeViewer() {
-      viewer.hidden = true;
-      vStage.querySelectorAll("img, video").forEach(el => el.remove());
-      vStage.classList.remove("busy", "failed");
-      document.body.classList.remove("lock");
-      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-    }
-    function step(d) {
-      const n = vIndex + d;
-      if (n < 0 || n >= state.posts.length) return;
-      vIndex = n;
-      renderViewer();
-      if (vIndex >= state.posts.length - 6) loadMore();
-    }
-    function viewSrc(p) { return isGif(p) ? p.file_url : (p.sample_url || p.file_url); }
-
-    function renderViewer() {
-      const post = state.posts[vIndex];
-      if (!post) return;
-      vStage.querySelectorAll("img, video").forEach(el => el.remove());
-      vStage.classList.remove("failed");
-      vStage.classList.add("busy");
-      const done = () => vStage.classList.remove("busy");
-      let el;
-      if (isVideo(post)) {
-        el = document.createElement("video");
-        el.src = post.file_url; el.controls = true; el.autoplay = true; el.loop = true; el.playsInline = true;
-        if (post.preview_url) el.poster = post.preview_url;
-        el.addEventListener("loadeddata", done);
-        el.addEventListener("error", () => { done(); vStage.classList.add("failed"); });
-      } else {
-        el = new Image();
-        el.alt = `Post ${post.id}`;
-        let triedOriginal = false;
-        el.addEventListener("load", done);
-        el.addEventListener("error", () => {
-          if (!triedOriginal && post.file_url && el.src !== post.file_url) { triedOriginal = true; el.src = post.file_url; }
-          else { done(); el.remove(); vStage.classList.add("failed"); }
-        });
-        el.src = viewSrc(post);
-      }
-      vStage.append(el);
-
-      $("vCount").textContent = `${vIndex + 1} of ${state.posts.length}${state.done ? "" : "+"}`;
-      $("vPrev").disabled = vIndex === 0;
-      $("vNext").disabled = vIndex >= state.posts.length - 1;
-      $("vOpen").href = post.file_url || post.sample_url || "#";
-      fillSheet(post);
-
-      const next = state.posts[vIndex + 1];
-      if (next && !isVideo(next)) new Image().src = viewSrc(next);
-    }
-
-    function fillSheet(post) {
-      vSheet.replaceChildren();
-      const rating = post.rating ? post.rating[0].toUpperCase() + post.rating.slice(1) : "Unknown";
-      const size = post.width && post.height ? `${post.width}×${post.height}` : "Unknown";
-      const stat = (label, value) => h("div", {}, h("dt", { text: label }), h("dd", { text: String(value) }));
-      vSheet.append(h("dl", { class: "stats" }, stat("Score", post.score ?? 0), stat("Rating", rating), stat("Size", size), stat("Post", post.id)));
-
-      const tags = (post.tags || "").trim().split(/\s+/).filter(Boolean);
-      if (!tags.length) { vSheet.append(h("p", { class: "none", text: "This post has no tags." })); return; }
-      const wrap = h("div", { class: "chips" });
-      const draw = all => {
-        wrap.replaceChildren(...(all ? tags : tags.slice(0, 16)).map(t =>
-          h("button", { type: "button", class: "chip", text: t, title: "Search this tag", onclick: () => {
-            closeViewer(); input.value = t; syncClear(); runSearch(t);
-          } })));
-      };
-      draw(false);
-      vSheet.append(wrap);
-      if (tags.length > 16) {
-        const more = h("button", { type: "button", class: "more", text: `Show all ${tags.length} tags` });
-        more.addEventListener("click", () => { draw(true); more.remove(); });
-        vSheet.append(more);
-      }
-    }
-
-    function setSheet(open) {
-      sheetOpen = open;
-      vSheet.hidden = !open;
-      vInfo.setAttribute("aria-pressed", String(open));
-      vInfo.setAttribute("aria-label", open ? "Hide details" : "Show details");
-    }
-    vInfo.addEventListener("click", () => setSheet(!sheetOpen));
-    $("vClose").addEventListener("click", closeViewer);
-    $("vPrev").addEventListener("click", () => step(-1));
-    $("vNext").addEventListener("click", () => step(1));
-    vStage.addEventListener("click", e => { if (e.target === vStage) closeViewer(); });
-
-    document.addEventListener("keydown", e => {
-      if (viewer.hidden) return;
-      if (e.key === "Escape") closeViewer();
-      else if (e.key === "ArrowLeft") step(-1);
-      else if (e.key === "ArrowRight") step(1);
-      else if (e.key.toLowerCase() === "i") setSheet(!sheetOpen);
-    });
-
-    let tx = 0, ty = 0, tt = 0, multi = false;
-    vStage.addEventListener("touchstart", e => {
-      multi = e.touches.length > 1;
-      tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now();
-    }, { passive: true });
-    vStage.addEventListener("touchmove", e => { if (e.touches.length > 1) multi = true; }, { passive: true });
-    vStage.addEventListener("touchend", e => {
-      if (multi || window.visualViewport && window.visualViewport.scale > 1.02) return;
-      const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
-      if (Date.now() - tt > 600) return;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
-      else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) closeViewer();
-    }, { passive: true });
-
-    /* ---------- password gate ---------- */
-    const gate = $("gate"), gatePw = $("gatePw"), gateErr = $("gateErr"), gateBtn = $("gateBtn");
-    function showGate(focus = true) {
-      gate.hidden = false;
-      document.body.classList.add("lock");
-      if (focus) setTimeout(() => gatePw.focus(), 50);
-    }
-    function hideGate() { gate.hidden = true; document.body.classList.remove("lock"); }
-    async function checkSession() {
-      try {
-        const r = await fetch("/api/auth", { cache: "no-store" });
-        if (r.ok) hideGate(); else showGate(false);
-      } catch { showGate(false); }
-    }
-    $("gateForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      gateErr.textContent = "";
-      gateBtn.disabled = true;
-      try {
-        const r = await fetch("/api/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: gatePw.value })
-        });
-        if (r.ok) {
-          gatePw.value = "";
-          hideGate();
-          if (state.searched) runSearch(state.base);
-        } else if (r.status === 429) gateErr.textContent = "Too many tries. Wait a few minutes and try again.";
-        else if (r.status === 500) gateErr.textContent = "The site isn't set up yet. Tell the admin.";
-        else gateErr.textContent = "That password isn't right. Get the current one from the Discord server.";
-      } catch { gateErr.textContent = "Couldn't reach the server. Try again."; }
-      finally { gateBtn.disabled = false; }
-    });
-    showGate(false);
-    checkSession();
-
-    /* ---------- opening splash ---------- */
-    (() => {
-      const sp = $("splash");
-      const hide = () => { sp.classList.add("out"); setTimeout(() => sp.remove(), 600); };
-      setTimeout(hide, matchMedia("(prefers-reduced-motion: reduce)").matches ? 400 : 1800);
-    })();
-
-    /* ---------- start ---------- */
-    layout(true);
-    showState("start");
-
-    // Optional: auto-search a safe default on first load
-    // runSearch("rating:safe");
-  </script>
 </body>
 </html>
