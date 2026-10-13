@@ -274,6 +274,31 @@
     .sheet .none { font-size: 13px; color: var(--muted); }
 
 
+
+    /* Password gate */
+    .gate {
+      position: fixed; inset: 0; z-index: 150; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      padding: calc(var(--safe-t) + 24px) calc(var(--safe-r) + 24px) calc(var(--safe-b) + 24px) calc(var(--safe-l) + 24px);
+      overflow-y: auto;
+    }
+    .gate[hidden] { display: none; }
+    .gate form { width: 100%; max-width: 340px; text-align: center; }
+    .gate .logo { margin: 0 auto 22px; width: 64px; height: 64px; border-radius: 19px; }
+    .gate .logo svg { width: 32px; height: 32px; }
+    .gate h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .gate p { margin: 8px 0 22px; font-size: 14px; color: var(--muted); }
+    .gate input {
+      width: 100%; height: 48px; padding: 0 14px; margin-bottom: 10px;
+      background: var(--raised); color: var(--text);
+      border: 1px solid var(--line); border-radius: 14px;
+      font: inherit; font-size: 16px; outline: none; text-align: center;
+    }
+    .gate input:focus { border-color: var(--accent); }
+    .gate .btn { width: 100%; height: 48px; border-radius: 14px; font-size: 15px; }
+    .gate .btn:disabled { opacity: .5; }
+    .gate .gate-err { min-height: 20px; margin-top: 12px; font-size: 13px; color: var(--danger); }
+
     /* Opening splash */
     #splash {
       position: fixed; inset: 0; z-index: 200; background: #000;
@@ -303,6 +328,22 @@
     </svg>
     <span>Velocity-Net</span>
   </div>
+  <div class="gate" id="gate">
+    <form id="gateForm">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <h2>Members only</h2>
+      <p>Enter the password from the Discord server to get in.</p>
+      <label class="sr-only" for="gatePw">Password</label>
+      <input id="gatePw" type="password" autocomplete="current-password" placeholder="Password" required />
+      <button type="submit" class="btn" id="gateBtn">Unlock</button>
+      <div class="gate-err" id="gateErr" role="alert"></div>
+    </form>
+  </div>
+
   <header class="top" id="top">
     <div class="row">
       <div class="brand">
@@ -359,10 +400,7 @@
   </div>
 
   <script>
-    // Your credentials
-    const API_KEY = "c077095d207d5f75ff398260363969d57c449972ae08ae0b028f1631a48987ae5d82d02883bb7af31f8ea7c93e09cfd484acf89904ccce1f3541629a0d580c65";
-    const USER_ID = "6918190";
-    const BASE = "https://api.rule34.xxx/index.php";
+    // The Rule34 key now lives on the server (see api/posts.js).
     const PAGE_SIZE = 40;
 
     /* ---------- helpers ---------- */
@@ -557,16 +595,13 @@
     }
 
     /* ---------- fetching ---------- */
-    function buildUrl(tags, pid = 0, limit = PAGE_SIZE) {
-      const params = new URLSearchParams({
-        page: "dapi", s: "post", q: "index", json: "1",
-        limit: String(limit), pid: String(pid), tags: tags || "",
-        api_key: API_KEY, user_id: USER_ID
-      });
-      return `${BASE}?${params.toString()}`;
+    function buildUrl(tags, pid = 0) {
+      const params = new URLSearchParams({ tags: tags || "", pid: String(pid) });
+      return `/api/posts?${params.toString()}`;
     }
     async function fetchPage(tags, pid, signal) {
       const res = await fetch(buildUrl(tags, pid), { signal });
+      if (res.status === 401) { showGate(); throw new Error("LOCKED"); }
       const text = (await res.text()).trim();
       if (!res.ok) throw new Error(`The server answered with status ${res.status}.`);
       if (!text) return []; // the API sends an empty body when nothing matches
@@ -606,6 +641,7 @@
         }
       } catch (err) {
         if (err.name === "AbortError") return;
+        if (err.message === "LOCKED") { clearTiles(); return; }
         const msg = err instanceof TypeError ? "Couldn't reach the server. Check your connection and try again." : err.message;
         if (reset || !state.posts.length) { clearTiles(); showState("error", msg); }
         else state.footError = msg;
@@ -757,6 +793,43 @@
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
       else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) closeViewer();
     }, { passive: true });
+
+    /* ---------- password gate ---------- */
+    const gate = $("gate"), gatePw = $("gatePw"), gateErr = $("gateErr"), gateBtn = $("gateBtn");
+    function showGate(focus = true) {
+      gate.hidden = false;
+      document.body.classList.add("lock");
+      if (focus) setTimeout(() => gatePw.focus(), 50);
+    }
+    function hideGate() { gate.hidden = true; document.body.classList.remove("lock"); }
+    async function checkSession() {
+      try {
+        const r = await fetch("/api/auth", { cache: "no-store" });
+        if (r.ok) hideGate(); else showGate(false);
+      } catch { showGate(false); }
+    }
+    $("gateForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      gateErr.textContent = "";
+      gateBtn.disabled = true;
+      try {
+        const r = await fetch("/api/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: gatePw.value })
+        });
+        if (r.ok) {
+          gatePw.value = "";
+          hideGate();
+          if (state.searched) runSearch(state.base);
+        } else if (r.status === 429) gateErr.textContent = "Too many tries. Wait a few minutes and try again.";
+        else if (r.status === 500) gateErr.textContent = "The site isn't set up yet. Tell the admin.";
+        else gateErr.textContent = "That password isn't right. Get the current one from the Discord server.";
+      } catch { gateErr.textContent = "Couldn't reach the server. Try again."; }
+      finally { gateBtn.disabled = false; }
+    });
+    showGate(false);
+    checkSession();
 
     /* ---------- opening splash ---------- */
     (() => {
