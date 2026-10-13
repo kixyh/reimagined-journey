@@ -1,3 +1,147 @@
+<style>
+#adm-btn{position:fixed;top:12px;left:12px;z-index:9999;height:38px;padding:0 14px;border-radius:10px;border:1px solid #26262e;background:#131318;color:#f2f2f5;font:600 13px system-ui,sans-serif;cursor:pointer}
+#adm{position:fixed;top:0;left:0;bottom:0;width:min(380px,100vw);z-index:9998;background:#0f0f13;border-right:1px solid #26262e;color:#f2f2f5;font:14px system-ui,sans-serif;padding:60px 16px 16px;overflow:auto;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 40px rgba(0,0,0,.5)}
+#adm.open{transform:none}
+#adm *{box-sizing:border-box}
+#adm h3{font-size:12px;color:#8a8a96;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px}
+#adm input{width:100%;height:42px;background:#1a1a21;border:1px solid #26262e;border-radius:10px;padding:0 12px;color:#f2f2f5;font-size:15px;outline:none;margin-bottom:8px}
+#adm input:focus{border-color:#7c9cff}
+#adm button{height:40px;border:0;border-radius:10px;background:#7c9cff;color:#000;font-weight:600;cursor:pointer;padding:0 14px;width:100%}
+#adm button.d{background:transparent;border:1px solid #4a2a2a;color:#ff6b6b;height:28px;font-size:12px;width:auto;margin-top:8px}
+#adm button.g{background:transparent;border:1px solid #26262e;color:#f2f2f5}
+#adm .hid{display:none}
+#adm .err{color:#ff6b6b;font-size:13px;margin-top:6px}
+#adm .m{color:#8a8a96;font-size:12px}
+#adm .it{background:#1a1a21;border:1px solid #26262e;border-radius:12px;padding:10px;margin-bottom:8px}
+#adm .tp{display:flex;justify-content:space-between;align-items:center}
+#adm .k{font-family:ui-monospace,monospace;font-size:13px;cursor:pointer}
+#adm .p{font-size:11px;padding:2px 8px;border-radius:99px}
+#adm .p.waiting{background:#2b2512;color:#fbbf24}#adm .p.locked{background:#112a1b;color:#4ade80}
+#adm .big{background:#1a1a21;border:1px dashed #26262e;border-radius:12px;padding:14px;text-align:center;margin-top:10px}
+#adm .big .k{font-size:19px;letter-spacing:1.5px}
+#adm .tm{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px}
+#adm .row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+#adm img{width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:6px}
+</style>
+
+<button id="adm-btn">☰ Admin</button>
+<div id="adm">
+  <div id="a-login">
+    <h3 style="margin-top:0">Staff login</h3>
+    <input id="a-pw" type="password" placeholder="Password" />
+    <button id="a-go">Unlock</button>
+    <div id="a-err" class="err hid"></div>
+  </div>
+
+  <div id="a-main" class="hid">
+    <div class="row" style="margin-top:0">
+      <b id="a-role"></b><button class="g" id="a-out" style="width:auto;height:30px">Log out</button>
+    </div>
+
+    <h3>Generate key</h3>
+    <input id="a-note" placeholder="Ticket # / note (optional)" maxlength="80" />
+    <button id="a-gen">Generate 2-hour key</button>
+    <div id="a-big" class="big hid">
+      <div class="m">Latest key (click to copy)</div>
+      <div class="k" id="a-bk"></div>
+      <div class="tm" id="a-bt"></div>
+      <div class="m" id="a-bm"></div>
+    </div>
+
+    <h3>Active keys <span id="a-cnt" class="m"></span></h3>
+    <div id="a-keys"></div>
+
+    <h3>Logged in on site <span id="a-ocnt" class="m"></span></h3>
+    <div id="a-online"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const h = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [s / 3600 | 0, s % 3600 / 60 | 0, s % 60].map(n => String(n).padStart(2, '0')).join(':'); };
+  const av = u => (u && /^\d+$/.test(u.id || '') && /^\w+$/.test(u.avatar || '')) ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64` : '';
+  let tok = sessionStorage.getItem('atok'), role = sessionStorage.getItem('arole'), st = { keys: [], online: [] }, poll;
+
+  async function api(p, opt = {}) {
+    const r = await fetch('/api/admin?p=' + p, { ...opt, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok } });
+    if (r.status === 401 && p === 'panel') { logout(); throw 0; }
+    return r.json();
+  }
+  const copy = (t, el) => { navigator.clipboard.writeText(t); const o = el.textContent; el.textContent = 'Copied!'; setTimeout(() => el.textContent = o, 900); };
+
+  function logout() {
+    sessionStorage.clear(); tok = null; clearInterval(poll);
+    $('#a-main').classList.add('hid'); $('#a-login').classList.remove('hid');
+  }
+  function show() {
+    $('#a-login').classList.add('hid'); $('#a-main').classList.remove('hid');
+    $('#a-role').textContent = (role || '').toUpperCase();
+    refresh(); clearInterval(poll); poll = setInterval(refresh, 5000);
+  }
+
+  $('#adm-btn').onclick = () => $('#adm').classList.toggle('open');
+  $('#a-out').onclick = logout;
+  $('#a-go').onclick = async () => {
+    const r = await fetch('/api/admin?p=login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('#a-pw').value }) });
+    const d = await r.json();
+    if (!r.ok) { $('#a-err').textContent = d.error || 'Failed'; $('#a-err').classList.remove('hid'); return; }
+    tok = d.token; role = d.role; sessionStorage.setItem('atok', tok); sessionStorage.setItem('arole', role);
+    $('#a-pw').value = ''; $('#a-err').classList.add('hid'); show();
+  };
+  $('#a-pw').addEventListener('keydown', e => e.key === 'Enter' && $('#a-go').click());
+  $('#a-gen').onclick = async () => {
+    await api('panel', { method: 'POST', body: JSON.stringify({ action: 'create', note: $('#a-note').value }) });
+    $('#a-note').value = ''; refresh();
+  };
+
+  async function refresh() {
+    try { st = await api('panel'); } catch { return; }
+    const keys = [...st.keys].sort((a, b) => b.createdAt - a.createdAt);
+    $('#a-cnt').textContent = `(${keys.length})`; $('#a-ocnt').textContent = `(${st.online.length})`;
+
+    const L = keys[0]; $('#a-big').classList.toggle('hid', !L);
+    if (L) {
+      $('#a-bk').textContent = L.key; $('#a-bk').onclick = () => copy(L.key, $('#a-bk'));
+      $('#a-bt').dataset.exp = L.expires;
+      $('#a-bm').textContent = L.status === 'locked' ? 'Locked to ' + (L.user?.name || 'user') : 'Not used yet';
+    }
+
+    const kl = $('#a-keys'); kl.replaceChildren();
+    if (!keys.length) kl.append(h('div', 'm', 'No active keys'));
+    keys.forEach(k => {
+      const it = h('div', 'it'), tp = h('div', 'tp');
+      const kk = h('span', 'k', k.key); kk.onclick = () => copy(k.key, kk);
+      tp.append(kk, h('span', 'p ' + k.status, k.status === 'locked' ? 'In use' : 'Waiting')); it.append(tp);
+      if (k.note) it.append(h('div', 'm', k.note));
+      if (k.user) { const u = h('div', 'm'); const s = av(k.user); if (s) { const i = h('img'); i.src = s; u.append(i); } u.append(k.user.name || 'unknown'); it.append(u); }
+      const r = h('div', 'row m'); const left = h('span'); left.dataset.exp = k.expires; left.dataset.pre = '1';
+      r.append(left, h('span', null, k.ip ? 'IP ' + k.ip : 'IP —')); it.append(r);
+      const rv = h('button', 'd', 'Revoke');
+      rv.onclick = async () => { if (confirm('Revoke ' + k.key + '?')) { await api('panel', { method: 'POST', body: JSON.stringify({ action: 'revoke', key: k.key }) }); refresh(); } };
+      it.append(rv); kl.append(it);
+    });
+
+    const ol = $('#a-online'); ol.replaceChildren();
+    if (!st.online.length) ol.append(h('div', 'm', 'Nobody online'));
+    st.online.forEach(u => {
+      const r = h('div', 'it'); const s = av(u); if (s) { const i = h('img'); i.src = s; r.append(i); }
+      r.append(u.name || 'unknown'); ol.append(r);
+    });
+    tick();
+  }
+  function tick() {
+    document.querySelectorAll('#adm [data-exp]').forEach(el => {
+      const l = Number(el.dataset.exp) - Date.now();
+      el.textContent = l > 0 ? (el.dataset.pre ? 'Expires in ' + fmt(l) : fmt(l)) : 'Expired';
+    });
+  }
+  setInterval(tick, 1000);
+  if (tok) show();
+})();
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
